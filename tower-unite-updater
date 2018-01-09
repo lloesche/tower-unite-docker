@@ -1,0 +1,25 @@
+#!/bin/bash
+cd /opt/steamcmd
+
+main() {
+    while :; do
+        update
+        sleep 900
+    done
+}
+
+update() {
+    local logfile="$(mktemp)"
+    echo "Updating/Validating Tower Unite"
+    ./steamcmd.sh +login anonymous +force_install_dir /opt/tower-unite +app_update 439660 validate +quit 2>&1 | tee "$logfile"
+    grep downloading "$logfile" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Tower Unite was updated - restarting Server"
+	supervisorctl restart tower-unite-server
+    else
+        echo "Tower Unite is already the latest version"
+    fi
+    rm -f "$logfile"
+}
+
+main

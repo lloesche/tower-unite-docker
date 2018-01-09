@@ -1,0 +1,32 @@
+[Unit]
+Description=Tower Unite Server
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+EnvironmentFile=-/etc/sysconfig/tower-unite
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull lloesche/tower-unite
+ExecStart=/usr/bin/docker run \
+          --name %n \
+          --rm \
+          -p 27015-27050:27015-27050/tcp \
+          -p 27015-27050:27015-27050/udp \
+          -p 7777-7780:7777-7780/udp \
+          -p 3478:3478/udp \
+          -p 4379-4380:4379-4380/udp \
+          --env ServerTitle \
+          --env MaxPlayers \
+          --env SteamLoginToken \
+          --dns 8.8.8.8 \
+          --dns 8.8.4.4 \
+          lloesche/tower-unite
+ExecStop=/usr/bin/docker stop %n
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+
